@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in ['KmkE2HuwhwOZauHMtO7LUFfpDYF2'];
+    }
+
+    function hasValidMenuFields() {
+      return request.resource.data.keys().hasOnly([
+          'name', 'description', 'price', 'category', 'imageUrl',
+          'available', 'featured', 'sortOrder', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.description is string
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.category is string
+        && request.resource.data.imageUrl is string
+        && request.resource.data.available is bool
+        && request.resource.data.featured is bool
+        && request.resource.data.sortOrder is number
+        && request.resource.data.sortOrder >= 0
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+    }
+
+    match /menuItems/{itemId} {
+      allow read: if true;
+      allow create: if isAdmin() && hasValidMenuFields();
+      allow update: if isAdmin() && hasValidMenuFields()
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId}/cartItems/{itemId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['menuItemId', 'quantity', 'note', 'updatedAt'])
+        && request.resource.data.menuItemId == itemId
+        && request.resource.data.quantity is number
+        && request.resource.data.quantity >= 1 && request.resource.data.quantity <= 20
+        && request.resource.data.note is string
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /orders/{orderId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['userId', 'orderCode', 'customerName', 'phone', 'orderType', 'pickupTime', 'tableNumber', 'items', 'total', 'note', 'status', 'createdAt', 'updatedAt'])
+        && request.resource.data.orderCode is string
+        && request.resource.data.orderCode.matches('^SC-[0-9]{8}-[A-HJ-NP-Z2-9]{4}$')
+        && request.resource.data.status == 'pending_whatsapp'
+        && request.resource.data.customerName is string
+        && request.resource.data.phone is string
+        && request.resource.data.orderType in ['pickup', 'dine_in']
+        && request.resource.data.pickupTime is string
+        && request.resource.data.tableNumber is string
+        && request.resource.data.total is number && request.resource.data.total >= 0
+        && request.resource.data.items is list && request.resource.data.items.size() > 0 && request.resource.data.items.size() <= 30
+        && request.resource.data.note is string
+        && request.resource.data.createdAt is timestamp && request.resource.data.updatedAt is timestamp;
+      allow update: if isAdmin() && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status in ['pending_whatsapp', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled'];
+      allow delete: if isAdmin();
+    }
+  }
+}

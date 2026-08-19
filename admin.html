@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Secure menu management for Sam Cafe staff.">
+  <meta name="theme-color" content="#3A2418">
+  <title>Sam Cafe | Menu Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="admin-header"><a class="brand" href="index.html">Sam Cafe</a><span>Menu management</span></header>
+  <main class="admin-shell">
+    <section class="login-card" id="loginPanel" aria-labelledby="loginTitle">
+      <p class="eyebrow">STAFF ONLY</p><h1 id="loginTitle">Manage today’s menu</h1>
+      <p>Sign in with an approved Google account to add, update or remove menu items.</p>
+      <div class="status" id="loginStatus" role="status" aria-live="polite" hidden></div>
+      <button class="button button--primary" id="googleLoginBtn" type="button">Continue with Google</button>
+      <p class="small-print">Access is checked against the configured administrator UID list and Firestore rules.</p>
+    </section>
+
+    <section class="admin-panel" id="adminPanel" hidden aria-labelledby="adminTitle">
+      <div class="admin-panel__top"><div><p class="eyebrow">MENU CONTROL</p><h1 id="adminTitle">Good to see you, <span id="adminName">staff</span>.</h1></div><button class="button button--ghost" id="logoutBtn" type="button">Log out</button></div>
+      <div class="status" id="adminStatus" role="status" aria-live="polite" hidden></div>
+      <div class="admin-grid">
+        <section class="editor-card" aria-labelledby="editorTitle">
+          <div class="card-heading"><h2 id="editorTitle">Add a menu item</h2><button class="text-button" id="cancelEditBtn" type="button" hidden>Cancel edit</button></div>
+          <form id="menuForm" novalidate>
+            <div class="field"><label for="itemName">Name <span aria-hidden="true">*</span></label><input id="itemName" name="name" required maxlength="80" autocomplete="off"></div>
+            <div class="field"><label for="itemDescription">Description <span aria-hidden="true">*</span></label><textarea id="itemDescription" name="description" required maxlength="240" rows="3"></textarea></div>
+            <div class="field-grid"><div class="field"><label for="itemPrice">Price (RM) <span aria-hidden="true">*</span></label><input id="itemPrice" name="price" type="number" min="0" step="0.01" inputmode="decimal" required></div><div class="field"><label for="itemOrder">Display order <span aria-hidden="true">*</span></label><input id="itemOrder" name="sortOrder" type="number" min="0" step="1" inputmode="numeric" required></div></div>
+            <div class="field"><label for="itemCategory">Category <span aria-hidden="true">*</span></label><select id="itemCategory" name="category" required><option value="Coffee">Coffee</option><option value="Tea">Tea</option><option value="Matcha">Matcha</option><option value="Desserts">Desserts</option><option value="Pastries">Pastries</option></select></div>
+            <div class="field"><label for="itemImageUrl">Image URL</label><input id="itemImageUrl" name="imageUrl" type="url" placeholder="https://example.com/photo.jpg"></div>
+            <div class="toggle-row"><label><input id="itemAvailable" name="available" type="checkbox" checked> Available to order</label><label><input id="itemFeatured" name="featured" type="checkbox"> Mark as popular</label></div>
+            <button class="button button--primary" id="saveItemBtn" type="submit">Save menu item</button>
+          </form>
+        </section>
+        <section class="list-card" aria-labelledby="listTitle">
+          <div class="card-heading"><div><h2 id="listTitle">All menu items</h2><p id="menuCount">Loading…</p></div><div class="card-actions"><button class="button button--secondary" id="seedMenuBtn" type="button">Import starter menu</button><button class="button button--ghost" id="updateMenuImagesBtn" type="button">Update menu images</button></div></div>
+          <div class="menu-admin-list" id="adminMenuList" aria-live="polite"></div>
+        </section>
+      </div>
+      <section class="list-card orders-card" aria-labelledby="ordersTitle"><div class="card-heading"><div><h2 id="ordersTitle">Orders</h2><p>Newest customer requests first</p></div><select id="orderStatusFilter" aria-label="Filter orders by status"><option value="all">All statuses</option><option value="pending_whatsapp">Pending WhatsApp</option><option value="confirmed">Confirmed</option><option value="preparing">Preparing</option><option value="ready">Ready</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div><div id="adminOrdersList" class="menu-admin-list" aria-live="polite"></div></section>
+    </section>
+  </main>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

@@ -10,7 +10,9 @@
 <meta property="og:title" content="Sam Cafe | Coffee & Desserts in Mersing">
 <meta property="og:description" content="Fresh coffee, homemade desserts and slow moments in Mersing, Johor.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="assets/images/hero.jpg">
+<!-- Replace this public GitHub Pages URL if the repository or account name changes. -->
+<meta property="og:image" content="https://sam100909.github.io/Sam-Cafe/assets/images/hero-cafe-interior.webp">
+<meta name="theme-color" content="#3A2418">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
 
@@ -29,10 +31,14 @@
 
     <nav class="navbar__nav" id="primary-nav">
       <a href="#home" class="navbar__link">Home</a>
-      <a href="#menu" class="navbar__link">Menu</a>
       <a href="#about" class="navbar__link">About</a>
-      <a href="#visit" class="navbar__link">Visit Us</a>
+      <a href="#menu" class="navbar__link">Menu</a>
+      <a href="#gallery" class="navbar__link">Gallery</a>
+      <a href="#reservation" class="navbar__link">Reservation</a>
+      <a href="#location" class="navbar__link">Location</a>
+      <a href="#contact" class="navbar__link">Contact</a>
     </nav>
+    <div class="shop-controls"><button class="account-button" id="accountButton" type="button" aria-expanded="false" aria-controls="accountMenu">Account</button><button class="cart-button" id="cartButton" type="button" aria-controls="shopDrawer" aria-label="Open cart">Cart <span id="cartCount" class="cart-count">0</span></button><div class="account-menu" id="accountMenu" hidden><button type="button" data-account-action="login">Sign in with Google</button><button type="button" data-account-action="cart" hidden>My Cart</button><button type="button" data-account-action="orders" hidden>My Orders</button><button type="button" data-account-action="logout" hidden>Sign out</button></div></div>
 
     <button class="navbar__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">
       <span></span><span></span><span></span>
@@ -41,14 +47,18 @@
 
   <nav class="mobile-nav" id="mobileNav" aria-hidden="true">
     <a href="#home" class="mobile-nav__link">Home</a>
-    <a href="#menu" class="mobile-nav__link">Menu</a>
     <a href="#about" class="mobile-nav__link">About</a>
-    <a href="#visit" class="mobile-nav__link">Visit Us</a>
+    <a href="#menu" class="mobile-nav__link">Menu</a>
+    <a href="#gallery" class="mobile-nav__link">Gallery</a>
+    <a href="#reservation" class="mobile-nav__link">Reservation</a>
+    <a href="#location" class="mobile-nav__link">Location</a>
+    <a href="#contact" class="mobile-nav__link">Contact</a>
   </nav>
 </header>
 <div class="mobile-nav__backdrop" id="mobileNavBackdrop"></div>
 
 <main id="home">
+  <aside class="announcement" id="announcement" aria-live="polite" hidden><p id="announcementText"></p></aside>
 
   <!-- ===== HERO ===== -->
   <section class="hero" aria-label="Introduction">
@@ -58,12 +68,12 @@
       <p class="hero__sub">Fresh coffee, homemade desserts and slow moments in Mersing.</p>
       <div class="hero__actions">
         <a href="#menu" class="btn btn--primary">View Menu</a>
-        <a href="#visit" class="btn btn--ghost">Visit Us</a>
+        <a href="#location" class="btn btn--ghost">Visit Us</a>
       </div>
     </div>
     <div class="hero__visual reveal">
       <div class="hero__image-wrap">
-        <img src="https://picsum.photos/seed/samcafe-hero/900/1125" alt="Latte art in a warm cup at Sam Cafe" class="hero__image" loading="eager">
+        <img src="assets/images/hero-cafe-interior.webp" alt="Warm cafe seating with coffee and dessert" class="hero__image" width="1600" height="1067" fetchpriority="high" decoding="async" onerror="this.hidden=true">
         <div class="hero__steam" aria-hidden="true">
           <span></span><span></span><span></span>
         </div>
@@ -82,51 +92,7 @@
       <h2 class="section__title">A Taste of Sam Cafe</h2>
     </div>
 
-    <div class="featured__grid">
-      <article class="card reveal">
-        <div class="card__image-wrap">
-          <img src="https://picsum.photos/seed/samcafe-latte/600/450" alt="Creamy latte with latte art" loading="lazy" class="card__image">
-        </div>
-        <div class="card__body">
-          <h3 class="card__name">Latte</h3>
-          <p class="card__desc">Smooth espresso balanced with silky steamed milk.</p>
-          <span class="card__price">RM 12</span>
-        </div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card__image-wrap">
-          <img src="https://picsum.photos/seed/samcafe-matcha/600/450" alt="Matcha latte with soft green tea foam" loading="lazy" class="card__image">
-        </div>
-        <div class="card__body">
-          <h3 class="card__name">Matcha Latte</h3>
-          <p class="card__desc">Stone-ground matcha whisked with steamed milk.</p>
-          <span class="card__price">RM 14</span>
-        </div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card__image-wrap">
-          <img src="https://picsum.photos/seed/samcafe-cheesecake/600/450" alt="Slice of Basque burnt cheesecake" loading="lazy" class="card__image">
-        </div>
-        <div class="card__body">
-          <h3 class="card__name">Basque Cheesecake</h3>
-          <p class="card__desc">Caramelised top, soft and creamy centre.</p>
-          <span class="card__price">RM 15</span>
-        </div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card__image-wrap">
-          <img src="https://picsum.photos/seed/samcafe-croissant/600/450" alt="Freshly baked butter croissant" loading="lazy" class="card__image">
-        </div>
-        <div class="card__body">
-          <h3 class="card__name">Croissant</h3>
-          <p class="card__desc">Buttery, flaky and baked fresh daily.</p>
-          <span class="card__price">RM 9</span>
-        </div>
-      </article>
-    </div>
+    <div class="featured__grid" id="featuredMenuList" aria-live="polite"><p class="menu-state">Loading favourites…</p></div>
   </section>
 
   <!-- ===== FULL MENU ===== -->
@@ -139,13 +105,14 @@
     <div class="menu__filters reveal" role="tablist" aria-label="Filter menu by category">
       <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">All</button>
       <button class="filter-btn" data-filter="coffee" role="tab" aria-selected="false">Coffee</button>
+      <button class="filter-btn" data-filter="tea" role="tab" aria-selected="false">Tea</button>
       <button class="filter-btn" data-filter="matcha" role="tab" aria-selected="false">Matcha</button>
       <button class="filter-btn" data-filter="desserts" role="tab" aria-selected="false">Desserts</button>
       <button class="filter-btn" data-filter="pastries" role="tab" aria-selected="false">Pastries</button>
     </div>
 
     <div class="menu__list reveal" id="menuList">
-      <!-- Items are rendered here by script.js from MENU_DATA -->
+      <p class="menu-state" id="menuState" role="status" aria-live="polite">Loading menu…</p>
     </div>
   </section>
 
@@ -157,7 +124,7 @@
   <section class="section about" id="about" aria-label="About Sam Cafe">
     <div class="about__grid">
       <div class="about__image reveal">
-        <img src="https://picsum.photos/seed/samcafe-interior/800/1000" alt="Warm interior seating area of Sam Cafe" loading="lazy">
+        <img src="assets/images/about-cafe-interior.webp" alt="Cafe interior with coffee station and dessert display" width="1600" height="1067" loading="lazy" decoding="async" onerror="this.hidden=true">
       </div>
       <div class="about__text reveal">
         <p class="eyebrow">OUR STORY</p>
@@ -171,30 +138,50 @@
           From the first pour of espresso to the last bite of cheesecake, we want your visit
           to feel unhurried &mdash; a small pause in a busy day.
         </p>
-        <a href="#visit" class="btn btn--primary">Visit Sam Cafe</a>
+        <a href="#location" class="btn btn--primary">Visit Sam Cafe</a>
       </div>
     </div>
   </section>
 
   <!-- ===== GALLERY ===== -->
-  <section class="section gallery" aria-label="Gallery">
+  <section class="section gallery" id="gallery" aria-label="Gallery">
     <div class="section__head reveal">
       <p class="eyebrow eyebrow--center">GALLERY</p>
       <h2 class="section__title">Moments at Sam Cafe</h2>
     </div>
 
     <div class="gallery__grid reveal">
-      <img src="https://picsum.photos/seed/samcafe-g1/500/700" alt="Coffee being poured at Sam Cafe" loading="lazy" class="gallery__item gallery__item--tall">
-      <img src="https://picsum.photos/seed/samcafe-g2/500/350" alt="Cup of coffee on a wooden table" loading="lazy" class="gallery__item">
-      <img src="https://picsum.photos/seed/samcafe-g3/500/350" alt="Slice of cake on a plate" loading="lazy" class="gallery__item">
-      <img src="https://picsum.photos/seed/samcafe-g4/500/350" alt="Cafe exterior storefront" loading="lazy" class="gallery__item">
-      <img src="https://picsum.photos/seed/samcafe-g5/500/700" alt="Matcha latte with foam art" loading="lazy" class="gallery__item gallery__item--tall">
-      <img src="https://picsum.photos/seed/samcafe-g6/500/350" alt="Cozy cafe interior seating" loading="lazy" class="gallery__item">
+      <img src="assets/images/gallery-pouring-coffee.webp" alt="Coffee being poured into a cup" loading="lazy" decoding="async" class="gallery__item gallery__item--tall" onerror="this.hidden=true">
+      <img src="assets/images/gallery-iced-coffee-dessert.webp" alt="Iced coffee beside a dessert" loading="lazy" decoding="async" class="gallery__item" onerror="this.hidden=true">
+      <img src="assets/images/gallery-cafe-mirrors.webp" alt="Warm cafe seating with mirrors" loading="lazy" decoding="async" class="gallery__item" onerror="this.hidden=true">
+      <img src="assets/images/gallery-cafe-counter.webp" alt="Cafe counter with coffee display" loading="lazy" decoding="async" class="gallery__item" onerror="this.hidden=true">
+      <img src="assets/images/gallery-cafe-seating.webp" alt="Modern cafe seating and plants" loading="lazy" decoding="async" class="gallery__item gallery__item--tall" onerror="this.hidden=true">
+      <img src="assets/images/gallery-coffee-shop.webp" alt="Coffee shop bar and stools" loading="lazy" decoding="async" class="gallery__item" onerror="this.hidden=true">
     </div>
   </section>
 
+  <!-- ===== RESERVATION ===== -->
+  <section class="section reservation" id="reservation" aria-labelledby="reservation-title">
+    <div class="reservation__intro reveal"><p class="eyebrow">MAKE A PLAN</p><h2 class="section__title" id="reservation-title">Reserve a Table</h2><p>Send us your preferred time and we’ll confirm your table on WhatsApp.</p><p class="reservation__note">For same-day bookings, please give us a little notice.</p></div>
+    <form class="reservation__form reveal" id="reservationForm" novalidate>
+      <div class="form-status" id="reservationStatus" role="alert" aria-live="assertive" hidden></div>
+      <div class="form-grid">
+        <div class="form-field"><label for="reservationName">Name <span aria-hidden="true">*</span></label><input id="reservationName" name="name" type="text" autocomplete="name" required></div>
+        <div class="form-field"><label for="reservationPhone">Phone number <span aria-hidden="true">*</span></label><input id="reservationPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required></div>
+        <div class="form-field"><label for="reservationDate">Date <span aria-hidden="true">*</span></label><input id="reservationDate" name="date" type="date" required></div>
+        <div class="form-field"><label for="reservationTime">Time <span aria-hidden="true">*</span></label><input id="reservationTime" name="time" type="time" required></div>
+        <div class="form-field"><label for="reservationGuests">Guests <span aria-hidden="true">*</span></label><select id="reservationGuests" name="guests" required><option value="">Select guests</option><option value="1">1 guest</option><option value="2">2 guests</option><option value="3">3 guests</option><option value="4">4 guests</option><option value="5">5 guests</option><option value="6+">6+ guests</option></select></div>
+        <div class="form-field form-field--full"><label for="reservationNotes">Special request / notes</label><textarea id="reservationNotes" name="notes" rows="3" placeholder="Birthday, dietary needs, or anything else we should know"></textarea></div>
+      </div>
+      <button class="btn btn--primary reservation__submit" type="submit">Reserve Table</button>
+    </form>
+  </section>
+
+  <!-- ===== REVIEWS ===== -->
+  <section class="section reviews" aria-labelledby="reviews-title"><div class="section__head reveal"><p class="eyebrow eyebrow--center">FROM OUR GUESTS</p><h2 class="section__title" id="reviews-title">Kind Words, Slow Mornings</h2></div><div class="reviews__grid" id="reviewsList"></div></section>
+
   <!-- ===== VISIT US ===== -->
-  <section class="section visit" id="visit" aria-label="Visit us">
+  <section class="section visit" id="location" aria-label="Location and contact">
     <div class="visit__grid">
       <div class="visit__info reveal">
         <p class="eyebrow">FIND US</p>
@@ -202,20 +189,15 @@
 
         <div class="visit__block">
           <h3 class="visit__label">Address</h3>
-          <p>Jalan Sabar,<br>Bandar Mersing,<br>Johor, Malaysia</p>
+          <p id="addressText">Jalan Sabar,<br>Bandar Mersing,<br>Johor, Malaysia</p>
         </div>
 
         <div class="visit__block">
           <h3 class="visit__label">Opening Hours</h3>
-          <ul class="hours-list">
-            <li><span>Monday – Tuesday</span><span>10:00 AM – 9:00 PM</span></li>
-            <li><span>Wednesday</span><span>Closed</span></li>
-            <li><span>Thursday – Friday</span><span>10:00 AM – 9:00 PM</span></li>
-            <li><span>Saturday – Sunday</span><span>9:00 AM – 10:00 PM</span></li>
-          </ul>
+          <ul class="hours-list" id="hoursList"></ul>
         </div>
 
-        <div class="visit__actions">
+        <div class="visit__actions" id="contact">
           <a id="directionsBtn" href="#" target="_blank" rel="noopener" class="btn btn--primary">Get Directions</a>
           <a id="whatsappBtn" href="#" target="_blank" rel="noopener" class="btn btn--secondary">WhatsApp Us</a>
           <a id="instagramBtn" href="#" target="_blank" rel="noopener" class="btn btn--ghost">Instagram</a>
@@ -224,6 +206,7 @@
 
       <div class="visit__map reveal">
         <iframe
+          id="locationMap"
           title="Sam Cafe location map"
           src="https://www.google.com/maps?q=Jalan+Sabar,+Bandar+Mersing,+Johor,+Malaysia&output=embed"
           loading="lazy"
@@ -234,6 +217,14 @@
   </section>
 
 </main>
+
+<aside class="shop-drawer" id="shopDrawer" aria-label="Shopping cart" aria-hidden="true">
+  <div class="drawer-head"><h2 id="drawerTitle">My Cart</h2><button class="drawer-close" id="drawerClose" type="button" aria-label="Close panel">Close</button></div>
+  <div class="drawer-status" id="drawerStatus" role="status" aria-live="polite" hidden></div>
+  <div id="cartView"><div id="cartItems"></div><div class="cart-total">Total <strong id="cartTotal">RM 0.00</strong></div><button class="btn btn--ghost" id="clearCartBtn" type="button">Clear cart</button><button class="btn btn--primary" id="checkoutBtn" type="button">Order via WhatsApp</button></div>
+  <div id="checkoutView" hidden><form id="checkoutForm" novalidate><div class="form-field"><label for="orderName">Customer name *</label><input id="orderName" name="customerName" required autocomplete="name"></div><div class="form-field"><label for="orderPhone">Phone number *</label><input id="orderPhone" name="phone" type="tel" required autocomplete="tel"></div><div class="form-field"><label for="orderType">Order type *</label><select id="orderType" name="orderType"><option value="pickup">Pickup</option><option value="dine_in">Dine-in</option></select></div><div class="form-field" id="pickupField"><label for="pickupTime">Pickup time *</label><input id="pickupTime" name="pickupTime" type="time"></div><div class="form-field" id="tableField" hidden><label for="tableNumber">Table number *</label><input id="tableNumber" name="tableNumber"></div><div class="form-field"><label for="orderNote">General note</label><textarea id="orderNote" name="note" rows="2"></textarea></div><button class="btn btn--primary" type="submit">Create WhatsApp order</button></form></div>
+  <div id="ordersView" hidden></div>
+</aside><div class="shop-backdrop" id="shopBackdrop"></div>
 
 <!-- ===== FOOTER ===== -->
 <footer class="footer">
@@ -246,24 +237,23 @@
     <div class="footer__col">
       <h3 class="footer__heading">Navigation</h3>
       <a href="#home">Home</a>
-      <a href="#menu">Menu</a>
       <a href="#about">About</a>
-      <a href="#visit">Visit Us</a>
+      <a href="#menu">Menu</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#reservation">Reservation</a>
+      <a href="#location">Location</a>
     </div>
 
     <div class="footer__col">
       <h3 class="footer__heading">Contact</h3>
-      <p>Jalan Sabar, Bandar Mersing, Johor, Malaysia</p>
+      <p id="footerAddress">Jalan Sabar, Bandar Mersing, Johor, Malaysia</p>
       <a id="footerWhatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
       <a id="footerInstagram" href="#" target="_blank" rel="noopener">Instagram</a>
     </div>
 
     <div class="footer__col">
       <h3 class="footer__heading">Opening Hours</h3>
-      <p>Mon–Tue: 10AM–9PM</p>
-      <p>Wed: Closed</p>
-      <p>Thu–Fri: 10AM–9PM</p>
-      <p>Sat–Sun: 9AM–10PM</p>
+      <div id="footerHours"></div>
     </div>
   </div>
 
@@ -272,6 +262,6 @@
   </div>
 </footer>
 
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>

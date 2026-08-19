@@ -1,240 +1,92 @@
-/* =========================================================
-   SAM CAFE — SCRIPT
-   ========================================================= */
+import { isFirebaseConfigured } from "./firebase-config.js";
+import { FALLBACK_MENU_ITEMS } from "./menu-data.js";
+import { initCommerce, addToCart, refreshCart } from "./auth-cart.js";
+import { initOrders } from "./orders.js";
 
-/* ---------- 1. CLIENT CONFIGURATION ----------
-   Edit the values below to update site-wide info. */
 const SITE_CONFIG = {
   businessName: "Sam Cafe",
-  whatsappNumber: "601156797653",   // e.g. "60123456789" (no + or spaces)
-  instagramUrl: "https://www.instagram.com/sam.en.9421?igsh=ZzRiYWhqNmZiMXZx&igsi=ZzRiYWhqNmZiMXZx",       // e.g. "https://instagram.com/samcafe"
+  whatsappNumber: "601156797653",
+  instagramUrl: "https://www.instagram.com/sam.en.9421?igsh=ZzRiYWhqNmZiMXZx&igsi=ZzRiYWhqNmZiMXZx",
   address: "Jalan Sabar, Bandar Mersing, Johor, Malaysia",
-  whatsappMessage: "Hi Sam Cafe! I found you through your website."
+  openingHours: [["Monday – Tuesday", "10:00 AM – 9:00 PM"], ["Wednesday", "Closed"], ["Thursday – Friday", "10:00 AM – 9:00 PM"], ["Saturday – Sunday", "9:00 AM – 10:00 PM"]],
+  announcement: { enabled: true, text: "Try our new Matcha Latte — made slow, served fresh." }
 };
-
-/* ---------- 2. MENU DATA ----------
-   Edit prices/items here — the menu section renders from this list. */
-const MENU_DATA = [
-  {
-    category: "Coffee",
-    key: "coffee",
-    items: [
-      { name: "Espresso", desc: "Rich and concentrated, single shot.", price: "RM 8" },
-      { name: "Americano", desc: "Espresso lengthened with hot water.", price: "RM 9" },
-      { name: "Latte", desc: "Espresso with silky steamed milk.", price: "RM 12" },
-      { name: "Cappuccino", desc: "Espresso, steamed milk and foam.", price: "RM 12" }
-    ]
-  },
-  {
-    category: "Matcha",
-    key: "matcha",
-    items: [
-      { name: "Matcha Latte", desc: "Stone-ground matcha, steamed milk.", price: "RM 14" }
-    ]
-  },
-  {
-    category: "Desserts",
-    key: "desserts",
-    items: [
-      { name: "Basque Cheesecake", desc: "Caramelised top, creamy centre.", price: "RM 15" },
-      { name: "Tiramisu", desc: "Espresso-soaked layers, cocoa dusted.", price: "RM 15" }
-    ]
-  },
-  {
-    category: "Pastries",
-    key: "pastries",
-    items: [
-      { name: "Croissant", desc: "Buttery, flaky, baked fresh daily.", price: "RM 9" }
-    ]
-  }
-];
+const REVIEWS = [{ name: "Aina R.", text: "The matcha is beautifully balanced, and the cafe feels wonderfully unhurried." }, { name: "Daniel T.", text: "A lovely little stop in Mersing. Great coffee, warm service and excellent cheesecake." }, { name: "Nurul H.", text: "My favourite place for a quiet catch-up. The staff made our birthday table feel special." }];
+let menuById = new Map();
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderMenu();
-  setupNavbarScroll();
-  setupMobileNav();
-  setupSmoothScrollClose();
-  setupMenuFilter();
-  setupScrollReveal();
-  setupContactLinks();
-  setupActiveNavLink();
+  renderSiteDetails(); renderReviews(); decorateReveals(); setupNavbarScroll(); setupMobileNav(); setupMenuFilter(); setupScrollReveal(); setupButtonFeedback(); setupContactLinks(); setupActiveNavLink(); setupReservationForm(); initCommerce(id => menuById.get(id)); initOrders(id => menuById.get(id), SITE_CONFIG.whatsappNumber); loadCustomerMenu();
 });
 
-/* ---------- 3. RENDER MENU ---------- */
-function renderMenu() {
-  const list = document.getElementById("menuList");
-  if (!list) return;
-
-  let html = "";
-  MENU_DATA.forEach(group => {
-    html += `<div class="menu__category" data-category="${group.key}">`;
-    html += `<h3 class="menu__category-title">${group.category}</h3>`;
-    group.items.forEach(item => {
-      html += `
-        <div class="menu-item" data-category="${group.key}">
-          <div>
-            <div class="menu-item__name">${item.name}</div>
-            <div class="menu-item__desc">${item.desc}</div>
-          </div>
-          <div class="menu-item__price">${item.price}</div>
-        </div>`;
-    });
-    html += `</div>`;
-  });
-
-  list.innerHTML = html;
-}
-
-/* ---------- 4. MENU FILTER ---------- */
-function setupMenuFilter() {
-  const buttons = document.querySelectorAll(".filter-btn");
-  const categories = document.querySelectorAll(".menu__category");
-
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      buttons.forEach(b => {
-        b.classList.remove("is-active");
-        b.setAttribute("aria-selected", "false");
-      });
-      btn.classList.add("is-active");
-      btn.setAttribute("aria-selected", "true");
-
-      const filter = btn.dataset.filter;
-
-      categories.forEach(cat => {
-        const show = filter === "all" || cat.dataset.category === filter;
-        cat.style.display = show ? "" : "none";
-      });
-    });
-  });
-}
-
-/* ---------- 5. NAVBAR SCROLL STATE ---------- */
-function setupNavbarScroll() {
-  const navbar = document.getElementById("navbar");
-  if (!navbar) return;
-
-  const onScroll = () => {
-    navbar.classList.toggle("is-scrolled", window.scrollY > 12);
-  };
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-}
-
-/* ---------- 6. MOBILE NAV ---------- */
-function setupMobileNav() {
-  const toggle = document.getElementById("navToggle");
-  const mobileNav = document.getElementById("mobileNav");
-  const backdrop = document.getElementById("mobileNavBackdrop");
-  if (!toggle || !mobileNav || !backdrop) return;
-
-  const openNav = () => {
-    mobileNav.classList.add("is-open");
-    backdrop.classList.add("is-open");
-    toggle.classList.add("is-active");
-    toggle.setAttribute("aria-expanded", "true");
-    mobileNav.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  };
-
-  const closeNav = () => {
-    mobileNav.classList.remove("is-open");
-    backdrop.classList.remove("is-open");
-    toggle.classList.remove("is-active");
-    toggle.setAttribute("aria-expanded", "false");
-    mobileNav.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  };
-
-  toggle.addEventListener("click", () => {
-    const isOpen = mobileNav.classList.contains("is-open");
-    isOpen ? closeNav() : openNav();
-  });
-
-  backdrop.addEventListener("click", closeNav);
-
-  document.querySelectorAll(".mobile-nav__link").forEach(link => {
-    link.addEventListener("click", closeNav);
-  });
-
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape" && mobileNav.classList.contains("is-open")) closeNav();
-  });
-}
-
-/* Close mobile menu automatically if the viewport grows back to desktop */
-function setupSmoothScrollClose() {
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 860) {
-      const mobileNav = document.getElementById("mobileNav");
-      const backdrop = document.getElementById("mobileNavBackdrop");
-      const toggle = document.getElementById("navToggle");
-      if (mobileNav && mobileNav.classList.contains("is-open")) {
-        mobileNav.classList.remove("is-open");
-        backdrop.classList.remove("is-open");
-        toggle.classList.remove("is-active");
-        toggle.setAttribute("aria-expanded", "false");
-        document.body.style.overflow = "";
-      }
-    }
-  });
-}
-
-/* ---------- 7. SCROLL REVEAL ---------- */
-function setupScrollReveal() {
-  const items = document.querySelectorAll(".reveal");
-  if (!items.length) return;
-
-  if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    items.forEach(el => el.classList.add("is-visible"));
-    return;
+async function loadCustomerMenu() {
+  if (!isFirebaseConfigured()) { renderMenu(FALLBACK_MENU_ITEMS); renderFeaturedMenu(FALLBACK_MENU_ITEMS); return; }
+  setMenuState("Loading today’s menu…");
+  try {
+    const [{ db, firebaseReady }, firestore] = await Promise.all([import("./firebase-service.js"), import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js")]);
+    if (!firebaseReady || !db) throw new Error("Firebase is not configured.");
+    const snapshot = await firestore.getDocs(firestore.query(firestore.collection(db, "menuItems"), firestore.orderBy("sortOrder", "asc")));
+    if (snapshot.empty) { renderFeaturedMenu([]); return setMenuState("Our menu is being prepared. Please check back shortly.", "empty"); }
+    const items = snapshot.docs.map(item => ({ id: item.id, ...item.data() })); renderMenu(items); renderFeaturedMenu(items);
+  } catch (error) {
+    console.warn("Firestore menu unavailable; displaying local fallback.", error);
+    renderMenu(FALLBACK_MENU_ITEMS); renderFeaturedMenu(FALLBACK_MENU_ITEMS);
+    setMenuState("We’re showing our current menu while the live menu reconnects.", "notice");
   }
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15 });
-
-  items.forEach(el => observer.observe(el));
 }
 
-/* ---------- 8. CONTACT LINKS (WhatsApp / Instagram / Directions) ---------- */
-function setupContactLinks() {
-  const waMessage = encodeURIComponent(SITE_CONFIG.whatsappMessage);
-  const waLink = `https://wa.me/${SITE_CONFIG.whatsappNumber}?text=${waMessage}`;
-  const igLink = SITE_CONFIG.instagramUrl;
-  const directionsLink = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(SITE_CONFIG.address)}`;
-
-  const whatsappTargets = [document.getElementById("whatsappBtn"), document.getElementById("footerWhatsapp")];
-  const instagramTargets = [document.getElementById("instagramBtn"), document.getElementById("footerInstagram")];
-  const directionsBtn = document.getElementById("directionsBtn");
-
-  whatsappTargets.forEach(el => { if (el) el.href = waLink; });
-  instagramTargets.forEach(el => { if (el) el.href = igLink; });
-  if (directionsBtn) directionsBtn.href = directionsLink;
+function renderMenu(items) {
+  menuById = new Map(items.map((item, index) => [item.id || `fallback-${index}`, { ...item, id:item.id || `fallback-${index}` }]));
+  items = [...menuById.values()];
+  refreshCart();
+  const list = document.getElementById("menuList"); if (!list) return;
+  setMenuState("");
+  const grouped = items.slice().sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0)).reduce((groups, item) => {
+    const category = item.category || "Other"; (groups[category] ||= []).push(item); return groups;
+  }, {});
+  list.innerHTML = Object.entries(grouped).map(([category, menuItems]) => `<section class="menu__category" data-category="${escapeHtml(category.toLowerCase())}" aria-label="${escapeHtml(category)}"><h3 class="menu__category-title">${escapeHtml(category)}</h3>${menuItems.map(renderMenuItem).join("")}</section>`).join("");
+  list.onclick = event => { const button = event.target.closest("[data-add-cart]"); if (button) addToCart(button.dataset.addCart); };
+  setupMenuFilter();
 }
 
-/* ---------- 9. ACTIVE NAV LINK ON SCROLL ---------- */
-function setupActiveNavLink() {
-  const sections = ["home", "menu", "about", "visit"]
-    .map(id => document.getElementById(id))
-    .filter(Boolean);
-  const links = document.querySelectorAll(".navbar__link");
-  if (!sections.length || !links.length || !("IntersectionObserver" in window)) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        links.forEach(link => {
-          link.style.opacity = link.getAttribute("href") === `#${entry.target.id}` ? "1" : "";
-        });
-      }
-    });
-  }, { rootMargin: "-40% 0px -50% 0px" });
-
-  sections.forEach(sec => observer.observe(sec));
+function renderMenuItem(item) {
+  const badges = `${item.featured ? '<span class="menu-badge menu-badge--popular">Popular</span>' : ""}${item.available === false ? '<span class="menu-badge menu-badge--soldout">Sold Out</span>' : ""}`;
+  const imageUrl = escapeHtml(item.imageUrl || "assets/images/about-cafe-interior.webp");
+  const name = escapeHtml(item.name || "Menu item");
+  return `<article class="menu-item ${item.available === false ? "is-soldout" : ""}"><div class="menu-item__image-wrap"><img src="${imageUrl}" alt="${name}" loading="lazy" decoding="async" class="menu-item__image" onerror="this.onerror=null;this.src='assets/images/about-cafe-interior.webp';this.alt='Sam Cafe interior';"></div><div class="menu-item__content"><div class="menu-item__name">${name} ${badges}</div><div class="menu-item__desc">${escapeHtml(item.description || "")}</div><div class="menu-item__actions"><button class="add-cart-btn" data-add-cart="${escapeHtml(item.id)}" type="button" ${item.available === false ? "disabled" : ""}>${item.available === false ? "Sold Out" : "Add to cart"}</button></div></div><div class="menu-item__price">${formatPrice(item.price)}</div></article>`;
 }
+function renderFeaturedMenu(items) {
+  const list = document.getElementById("featuredMenuList"); if (!list) return;
+  const featured = items.filter(item => item.available !== false && item.featured).slice(0, 4);
+  const cards = (featured.length ? featured : items.filter(item => item.available !== false).slice(0, 4));
+  list.innerHTML = cards.length ? cards.map(item => `<article class="card reveal"><div class="card__image-wrap"><img src="${escapeHtml(item.imageUrl || "assets/images/about-cafe-interior.webp")}" alt="${escapeHtml(item.name)} at Sam Cafe" loading="lazy" decoding="async" class="card__image" onerror="this.onerror=null;this.src='assets/images/about-cafe-interior.webp';this.alt='Sam Cafe interior';"></div><div class="card__body"><h3 class="card__name">${escapeHtml(item.name)}</h3><p class="card__desc">${escapeHtml(item.description || "")}</p><span class="card__price">${formatPrice(item.price)}</span></div></article>`).join("") : '<p class="menu-state">Favourites will appear here soon.</p>';
+  list.querySelectorAll(".reveal").forEach((card, index) => { card.classList.add(index % 2 ? "reveal--right" : "reveal--left"); card.style.setProperty("--reveal-delay", `${index * 70}ms`); });
+  setupScrollReveal();
+}
+function setMenuState(message, type = "") { const state = document.getElementById("menuState"); if (!state) return; state.textContent = message; state.className = `menu-state ${type}`; state.hidden = !message; }
+function formatPrice(value) { const amount = Number(value); return Number.isFinite(amount) ? `RM ${amount.toFixed(2)}` : "Price on request"; }
+function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]); }
+
+function renderSiteDetails() {
+  const announcement = document.getElementById("announcement"), announcementText = document.getElementById("announcementText");
+  if (announcement && announcementText && SITE_CONFIG.announcement.enabled && SITE_CONFIG.announcement.text) { announcementText.textContent = SITE_CONFIG.announcement.text; announcement.hidden = false; }
+  const addressText = document.getElementById("addressText"), footerAddress = document.getElementById("footerAddress");
+  if (addressText) addressText.innerHTML = SITE_CONFIG.address.replace(/,\s*/g, ",<br>"); if (footerAddress) footerAddress.textContent = SITE_CONFIG.address;
+  const map = document.getElementById("locationMap"); if (map) map.src = `https://www.google.com/maps?q=${encodeURIComponent(SITE_CONFIG.address)}&output=embed`;
+  const hoursList = document.getElementById("hoursList"), footerHours = document.getElementById("footerHours");
+  if (hoursList) hoursList.innerHTML = SITE_CONFIG.openingHours.map(([day, hours]) => `<li><span>${day}</span><span>${hours}</span></li>`).join("");
+  if (footerHours) footerHours.innerHTML = SITE_CONFIG.openingHours.map(([day, hours]) => `<p>${day}: ${hours}</p>`).join("");
+}
+function renderReviews() { const list = document.getElementById("reviewsList"); if (list) list.innerHTML = REVIEWS.map(review => `<article class="review reveal"><p class="review__stars" aria-label="5 out of 5 stars">★★★★★</p><blockquote>“${review.text}”</blockquote><p class="review__name">${review.name}</p></article>`).join(""); }
+function setupMenuFilter() { document.querySelectorAll(".filter-btn").forEach(btn => { if (btn.dataset.bound) return; btn.dataset.bound = "true"; btn.addEventListener("click", () => { document.querySelectorAll(".filter-btn").forEach(item => { item.classList.toggle("is-active", item === btn); item.setAttribute("aria-selected", String(item === btn)); }); document.querySelectorAll(".menu__category").forEach(category => { category.hidden = btn.dataset.filter !== "all" && category.dataset.category !== btn.dataset.filter; }); }); }); }
+function setupNavbarScroll() { const navbar = document.getElementById("navbar"); if (!navbar) return; const update = () => navbar.classList.toggle("is-scrolled", window.scrollY > 12); update(); window.addEventListener("scroll", update, { passive: true }); }
+function setupMobileNav() { const toggle = document.getElementById("navToggle"), nav = document.getElementById("mobileNav"), backdrop = document.getElementById("mobileNavBackdrop"); if (!toggle || !nav || !backdrop) return; const close = () => { nav.classList.remove("is-open"); backdrop.classList.remove("is-open"); toggle.classList.remove("is-active"); toggle.setAttribute("aria-expanded", "false"); nav.setAttribute("aria-hidden", "true"); document.body.classList.remove("nav-open"); }; const open = () => { nav.classList.add("is-open"); backdrop.classList.add("is-open"); toggle.classList.add("is-active"); toggle.setAttribute("aria-expanded", "true"); nav.setAttribute("aria-hidden", "false"); document.body.classList.add("nav-open"); }; toggle.addEventListener("click", () => nav.classList.contains("is-open") ? close() : open()); backdrop.addEventListener("click", close); nav.querySelectorAll("a").forEach(link => link.addEventListener("click", close)); document.addEventListener("keydown", event => { if (event.key === "Escape") close(); }); window.addEventListener("resize", () => { if (window.innerWidth > 860) close(); }); }
+function setupScrollReveal() { const items = document.querySelectorAll(".reveal"); if (!items.length) return; if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { items.forEach(item => item.classList.add("is-visible")); return; } const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); } }), { threshold: 0.12 }); items.forEach(item => observer.observe(item)); }
+function decorateReveals() { [".featured__grid .reveal", ".reviews__grid .reveal", ".gallery__grid", ".menu__list", ".reservation"].forEach((selector, groupIndex) => document.querySelectorAll(selector).forEach((item, index) => { if (!item.classList.contains("reveal")) item.classList.add("reveal"); item.classList.add(index % 3 === 0 ? "reveal--left" : index % 3 === 1 ? "reveal--up" : "reveal--right"); item.style.setProperty("--reveal-delay", `${Math.min(index, 4) * 70 + groupIndex * 20}ms`); })); }
+function setupButtonFeedback() { document.querySelectorAll(".btn, .filter-btn, .navbar__toggle").forEach(control => { control.addEventListener("pointerdown", () => control.classList.add("is-pressed")); ["pointerup", "pointercancel", "pointerleave"].forEach(event => control.addEventListener(event, () => control.classList.remove("is-pressed"))); }); }
+function setupContactLinks() { const message = encodeURIComponent(`Hi ${SITE_CONFIG.businessName}! I found you through your website.`), whatsappLink = `https://wa.me/${SITE_CONFIG.whatsappNumber}?text=${message}`, directionsLink = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(SITE_CONFIG.address)}`; ["whatsappBtn", "footerWhatsapp"].forEach(id => { const link = document.getElementById(id); if (link) link.href = whatsappLink; }); ["instagramBtn", "footerInstagram"].forEach(id => { const link = document.getElementById(id); if (link) link.href = SITE_CONFIG.instagramUrl; }); const directions = document.getElementById("directionsBtn"); if (directions) directions.href = directionsLink; }
+function setupReservationForm() { const form = document.getElementById("reservationForm"), date = document.getElementById("reservationDate"); if (!form || !date) return; date.min = localDateString(new Date()); form.addEventListener("submit", event => { event.preventDefault(); const reservation = Object.fromEntries(new FormData(form).entries()), error = validateReservation(reservation); if (error) return showReservationStatus(error, true); sendReservationToWhatsApp(reservation); }); }
+function validateReservation(reservation) { if (!reservation.name.trim() || !reservation.phone.trim() || !reservation.date || !reservation.time || !reservation.guests) return "Please complete all required fields before reserving."; if (reservation.date < localDateString(new Date())) return "Please select today or a future date."; return ""; }
+function sendReservationToWhatsApp(reservation) { const formattedDate = new Intl.DateTimeFormat("en-MY", { day: "numeric", month: "long", year: "numeric" }).format(new Date(`${reservation.date}T12:00:00`)), formattedTime = new Intl.DateTimeFormat("en-MY", { hour: "numeric", minute: "2-digit" }).format(new Date(`1970-01-01T${reservation.time}:00`)), notes = reservation.notes.trim() || "None", message = `Reservation Request — ${SITE_CONFIG.businessName}\n\nName: ${reservation.name.trim()}\nPhone: ${reservation.phone.trim()}\nDate: ${formattedDate}\nTime: ${formattedTime}\nGuests: ${reservation.guests}\nSpecial Request: ${notes}`; window.open(`https://wa.me/${SITE_CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener"); showReservationStatus("Your reservation request is ready in WhatsApp.", false); }
+function showReservationStatus(message, isError) { const status = document.getElementById("reservationStatus"); if (!status) return; status.textContent = message; status.classList.toggle("is-error", isError); status.hidden = false; }
+function localDateString(date) { const offset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() - offset).toISOString().slice(0, 10); }
+function setupActiveNavLink() { const sections = ["home", "about", "menu", "gallery", "reservation", "location", "contact"].map(id => document.getElementById(id)).filter(Boolean); if (!("IntersectionObserver" in window)) return; const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) document.querySelectorAll(".navbar__link").forEach(link => link.classList.toggle("is-current", link.getAttribute("href") === `#${entry.target.id}`)); }), { rootMargin: "-35% 0px -55% 0px" }); sections.forEach(section => observer.observe(section)); }
