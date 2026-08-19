@@ -2,6 +2,7 @@ import { isFirebaseConfigured } from "./firebase-config.js";
 import { FALLBACK_MENU_ITEMS } from "./menu-data.js";
 import { initCommerce, addToCart, refreshCart } from "./auth-cart.js";
 import { initOrders } from "./orders.js";
+import { collapseExactMenuDuplicates } from "./menu-duplicates.js";
 
 const SITE_CONFIG = {
   businessName: "Sam Cafe",
@@ -19,33 +20,37 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function loadCustomerMenu() {
-  if (!isFirebaseConfigured()) { renderMenu(FALLBACK_MENU_ITEMS); renderFeaturedMenu(FALLBACK_MENU_ITEMS); return; }
+  if (!isFirebaseConfigured()) { renderFeaturedMenu(renderMenu(FALLBACK_MENU_ITEMS)); return; }
   setMenuState("Loading today’s menu…");
   try {
     const [{ db, firebaseReady }, firestore] = await Promise.all([import("./firebase-service.js"), import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js")]);
     if (!firebaseReady || !db) throw new Error("Firebase is not configured.");
     const snapshot = await firestore.getDocs(firestore.query(firestore.collection(db, "menuItems"), firestore.orderBy("sortOrder", "asc")));
     if (snapshot.empty) { renderFeaturedMenu([]); return setMenuState("Our menu is being prepared. Please check back shortly.", "empty"); }
-    const items = snapshot.docs.map(item => ({ id: item.id, ...item.data() })); renderMenu(items); renderFeaturedMenu(items);
+    const items = snapshot.docs.map(item => ({ id: item.id, ...item.data() })); renderFeaturedMenu(renderMenu(items));
   } catch (error) {
     console.warn("Firestore menu unavailable; displaying local fallback.", error);
-    renderMenu(FALLBACK_MENU_ITEMS); renderFeaturedMenu(FALLBACK_MENU_ITEMS);
+    renderFeaturedMenu(renderMenu(FALLBACK_MENU_ITEMS));
     setMenuState("We’re showing our current menu while the live menu reconnects.", "notice");
   }
 }
 
 function renderMenu(items) {
-  menuById = new Map(items.map((item, index) => [item.id || `fallback-${index}`, { ...item, id:item.id || `fallback-${index}` }]));
-  items = [...menuById.values()];
+  const documentItems = items.map((item, index) => ({ ...item, id: item.id || `fallback-${index}` }));
+  const { allByDocumentId, items: visibleItems, duplicateGroups } = collapseExactMenuDuplicates(documentItems);
+  menuById = allByDocumentId;
   refreshCart();
   const list = document.getElementById("menuList"); if (!list) return;
   setMenuState("");
-  const grouped = items.slice().sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0)).reduce((groups, item) => {
+  const nameCounts = Object.fromEntries(documentItems.reduce((counts, item) => counts.set(item.name || "Untitled item", (counts.get(item.name || "Untitled item") || 0) + 1), new Map()));
+  console.info("[Sam Cafe] Full menu payload", { documentCount: documentItems.length, nameCounts, visibleCount: visibleItems.length, suppressedDuplicateDocumentIds: duplicateGroups.flatMap(group => group.duplicates.map(item => item.id)), conflictingDuplicateDocumentIds: duplicateGroups.filter(group => !group.exact).flatMap(group => group.duplicates.map(item => item.id)) });
+  const grouped = visibleItems.slice().sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0)).reduce((groups, item) => {
     const category = item.category || "Other"; (groups[category] ||= []).push(item); return groups;
   }, {});
   list.innerHTML = Object.entries(grouped).map(([category, menuItems]) => `<section class="menu__category" data-category="${escapeHtml(category.toLowerCase())}" aria-label="${escapeHtml(category)}"><h3 class="menu__category-title">${escapeHtml(category)}</h3>${menuItems.map(renderMenuItem).join("")}</section>`).join("");
   list.onclick = event => { const button = event.target.closest("[data-add-cart]"); if (button) addToCart(button.dataset.addCart); };
   setupMenuFilter();
+  return visibleItems;
 }
 
 function renderMenuItem(item) {
